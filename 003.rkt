@@ -1,6 +1,4 @@
 #lang racket
-(require memoize)
-(require racket/stream)
 (require math/number-theory)
 
 (apply
