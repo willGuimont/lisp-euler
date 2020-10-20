@@ -1,6 +1,8 @@
 #lang racket
 
-(define (is-palindrome x) (let ((s (~a x))) (equal? s (list->string (reverse (string->list s))))))
+(define (reverse-string s) (list->string (reverse (string->list s))))
+
+(define (is-palindrome x) (let ((s (~a x))) (equal? s (reverse-string s))))
 
 (define xs (range 100 1000 1))
 
