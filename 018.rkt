@@ -1,4 +1,6 @@
 #lang racket
+(require math/array)
+
 (define numbers
   '(75 95 64 17 47 82 18 35 87 10 20 04 82 47 65 19
     01 23 75 03 34 88 02 77 73 07 63 67 99 65 04 28
@@ -10,23 +12,19 @@
     98 73 93 38 53 60 04 23))
 
 (define (triangle)
-  (define (iter n xs)
-    (cond [(= 0 (length xs)) '()]
+  (define (iter n xs c)
+    (cond [(= 0 (length xs)) c]
           [else
-           (cons (take xs n) (iter (add1 n) (drop xs n)))]))
-  (iter 1 numbers))
+           (iter (add1 n) (drop xs n) (vector-append c (vector (apply vector (take xs n)))))]))
+  (iter 1 numbers (list->vector '())))
 
 (define (empty-world n)
-  (define (iter i)
-    (let ([xs (build-list i (lambda (x) 0))])
-      (cond [(= i n) (list xs)]
+  (define (iter i c)
+    (let ([xs (vector (apply vector (build-list i (lambda (x) 0))))])
+      (cond [(= i (add1 n)) c]
           [else
-           (cons xs (iter (add1 i)))])))
-  (iter 1))
-
-(define (set-at xs n e)
-  (cond [(>= n (length xs)) xs]
-        [else (append (take xs n) (list e) (drop xs (add1 n)))]))
+           (iter (add1 i) (vector-append c xs))])))
+  (iter 1 (list->vector '())))
 
 (define (solve world)
   (define (build-table n i all-lines current-line table)
