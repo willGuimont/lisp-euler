@@ -1,5 +1,4 @@
 #!/usr/bin/sbcl --script
-;(print (format nil "~r" 1234))
 
 (defun iter (n c xs)
   (if (> c n)
