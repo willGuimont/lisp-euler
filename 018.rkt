@@ -1,5 +1,4 @@
 #lang racket
-(require math/array)
 
 (define numbers
   '(75 95 64 17 47 82 18 35 87 10 20 04 82 47 65 19
@@ -18,19 +17,44 @@
            (iter (add1 n) (drop xs n) (vector-append c (vector (apply vector (take xs n)))))]))
   (iter 1 numbers (list->vector '())))
 
-(define (empty-world n)
-  (define (iter i c)
-    (let ([xs (vector (apply vector (build-list i (lambda (x) 0))))])
-      (cond [(= i (add1 n)) c]
-          [else
-           (iter (add1 i) (vector-append c xs))])))
-  (iter 1 (list->vector '())))
+
 
 (define (solve world)
-  (define (build-table n i all-lines current-line table)
-    (cond [(= n (length world)) table]
-          [(= i (add1 n)) (build-table (add1 n) 0 (drop all-lines 1) (first current-line) table)]
+  (define (empty-table n)
+    (define (iter i c)
+      (let ([xs (vector (apply vector (build-list i (lambda (x) 0))))])
+        (cond [(= i (add1 n)) c]
+              [else
+               (iter (add1 i) (vector-append c xs))])))
+    (iter 1 (list->vector '())))
+  
+  (define (get-at-or-0 n i xs)
+    (cond [(or (< n 0) (>= n (vector-length xs))) 0]
+          [(or (< i 0) (>= i (vector-length (vector-ref xs n)))) 0]
+          [else (vector-ref (vector-ref xs n) i)]))
+  
+  (define (build-table n i table)
+    (cond [(= n (vector-length world)) table]
+          [(= i (add1 n)) (build-table (add1 n) 0 table)]
           [else
-           (let ([new-table table])
-             (build-table n (add1 i) all-lines (first all-lines) new-table))]))
-  (+ 1 2))
+           (vector-set! (vector-ref table n) i (+ (get-at-or-0 n i world) (max (get-at-or-0 (sub1 n) (sub1 i) table) (get-at-or-0 (sub1 n) i table))))
+           (build-table n (add1 i) table)]))
+  
+  (define (max-index xs)
+    (define (iter ys m mi i)
+      (cond [(empty? ys) mi]
+            [(> (car ys) m) (iter (cdr ys) (car ys) i (add1 i))]
+            [else (iter (cdr ys) m mi (add1 i))]))
+    (iter (vector->list xs) -inf.0 -1 0))
+  
+  (let
+      [(table
+        (build-table 0 0 (empty-table (vector-length world))))]
+    (let
+        [(n (sub1 (vector-length table)))]
+      (let
+          [(i (max-index (vector-ref table n)))]
+      (get-at-or-0 n i table)))))
+
+
+(solve (triangle))
